@@ -13,10 +13,10 @@ nv.addGraph(function() {
     });
 
     chart.xAxis.tickFormat(d3.format('.02f'));
-    //.axisLabel('Year');
+         .axisLabel('FSA Numeracy Score');
 
     chart.yAxis.tickFormat(d3.format('.02f'));
-    //            .axisLabel('FSA Numeracy Score');
+         .axisLabel('FSA Literacy Score');
 
     chart.tooltipContent(function(key, x, y, e, graph) {
         return '<h2>' + key + ':' + e.point.year + '</h2>';
