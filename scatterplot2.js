@@ -12,10 +12,10 @@ nv.addGraph(function() {
         return labelValues[d];
     });
 
-    chart.xAxis.tickFormat(d3.format('.02f'));
+    chart.xAxis.tickFormat(d3.format('.02f'))
          .axisLabel('FSA Numeracy Score');
 
-    chart.yAxis.tickFormat(d3.format('.02f'));
+    chart.yAxis.tickFormat(d3.format('.02f'))
          .axisLabel('FSA Literacy Score');
 
     chart.tooltipContent(function(key, x, y, e, graph) {
