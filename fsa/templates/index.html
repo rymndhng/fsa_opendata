@@ -1,70 +1,17 @@
 <html>
+
 <head>
     <title>FSA</title>
+
     <script src="/static/js/lib/d3.v3.js"></script>
     <script src="/static/js/lib/nv.d3.js"></script>
 </head>
+
 <body>
-    <style>
-    #chart svg {
-      height: 400px;
-    }
-
-    </style>
-
-
     <div id="chart">
-      <svg></svg>
+      <svg style="height: 400px"></svg>
     </div>
-
-
-
-    <script>
-        function data() {
-          var sin = [],
-              cos = [];
-
-          for (var i = 0; i < 100; i++) {
-            sin.push({x: i, y: Math.sin(i/10)});
-            cos.push({x: i, y: .5 * Math.cos(i/10)});
-          }
-
-          return [
-            {
-              values: sin,
-              key: 'Sine Wave',
-              color: '#ff7f0e'
-            },
-            {
-              values: cos,
-              key: 'Cosine Wave',
-              color: '#2ca02c'
-            }
-          ];
-        }
-
-        nv.addGraph(function() {
-          var chart = nv.models.lineChart()
-                .useInteractiveGuideline(true)
-          ;
-
-          chart.xAxis
-              .axisLabel('Time (ms)')
-              .tickFormat(d3.format(',r'));
-
-          chart.yAxis
-              .axisLabel('Voltage (v)')
-              .tickFormat(d3.format('.02f'));
-
-          d3.select('#chart svg')
-              .datum(data())
-            .transition().duration(500)
-              .call(chart);
-
-          nv.utils.windowResize(chart.update);
-
-          return chart;
-        });
-    </script>
+    <script src="/static/js/fsa_linechart.js"></script>
 </body>
-</html
+
+</html>
