@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<link href="lib/src/nv.d3.css" rel="stylesheet" type="text/css">
+
+<style>
+
+body {
+  overflow-y:scroll;
+  margin: 0;
+  padding: 0;
+}
+
+svg {
+  overflow: hidden;
+}
+
+div {
+  border: 0;
+  margin: 0;
+}
+
+/*
+#offsetDiv {
+  margin-left: 100px;
+  margin-top: 100px;
+}
+*/
+
+
+#test1 {
+  margin: 0;
+}
+
+#test1 svg {
+  height: 500px;
+}
+
+</style>
+
+<body>
+
+<div id="offsetDiv">
+  <div id="test1" class='with-3d-shadow with-transitions'>
+    <svg></svg>
+  </div>
+  <input id="filter-region-text" type="text" placeholder="region" />
+  <button id="filter-region">Filter by Region</button>
+  <button id="filter-none">None</button>
+</div>
+</body>
+
+<script src="lib/underscore.js"></script>
+<script src="lib/jquery-2.1.0.min.js"></script>
+<script src="lib/lib/d3.v3.js"></script>
+<!--<script src="../lib/fisheye.js"></script>-->
+<script src="lib/nv.d3.js"></script>
+<script src="lib/src/tooltip.js"></script>
+<script src="lib/src/utils.js"></script>
+<script src="lib/src/models/legend.js"></script>
+<script src="lib/src/models/axis.js"></script>
+<script src="lib/src/models/distribution.js"></script>
+<script src="lib/src/models/scatter.js"></script>
+<script src="lib/src/models/scatterChart.js"></script>
+<script src="scatterplot.js"></script>
+</html>
