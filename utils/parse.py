@@ -1,9 +1,9 @@
-from fsa.models import FsaRecord
+from fsa.models import Record as FsaRecord
 import logging
 import sys
 
 def parse_datafile(filename):
-    with open("Foundation_Skills_Assessment_2012-2013_Schools_Only.txt") as f:
+    with open(filename) as f:
         # Figure out index of fields of interest
         raw_field_names = {'District Name', 'School Year', 'School Name', 'Sub Population', 'Grade', 'Fsa Skill Code', 'Number Writers', 'Score', 'Participation Rate'}
         headers = f.readline().strip().split("\t")
@@ -31,4 +31,5 @@ def parse_datafile(filename):
             except:
                 pass
 
-parse_datafile("Foundation_Skills_Assessment_2012-2013_Schools_Only.txt")
+if __name__ == '__main__':
+    parse_datafile("raw_data/Foundation_Skills_Assessment_2012-2013_Schools_Only.txt")
