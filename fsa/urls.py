@@ -2,6 +2,6 @@ from django.conf.urls import patterns, include, url
 
 urlpatterns = patterns('',
     # Examples:
-     url(r'^/home?$', 'fsa.views.home', name='home'),
-     url(r'^/?$', 'fsa.views.index', name='index'),
+     url(r'^line_chart/?$', 'fsa.views.line_chart', name='line_chart'),
+     url(r'^data/?$', 'fsa.views.data', name='data'),
 )

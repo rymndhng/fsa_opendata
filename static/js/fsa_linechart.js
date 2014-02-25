@@ -1,46 +1,61 @@
-function data() {
-  var sin = [],
-      cos = [];
-
-  for (var i = 0; i < 100; i++) {
-    sin.push({x: i, y: Math.sin(i/10)});
-    cos.push({x: i, y: .5 * Math.cos(i/10)});
-  }
-
-  return [
-    {
-      values: sin,
-      key: 'Sine Wave',
-      color: '#ff7f0e'
-    },
-    {
-      values: cos,
-      key: 'Cosine Wave',
-      color: '#2ca02c'
-    }
-  ];
+function fetchDataAndDrawChart() {
+    d3.json("/fsa/data", function(data) {
+        drawChart(parseToXY(data));
+    });
 }
 
-nv.addGraph(function() {
-  var chart = nv.models.lineChart()
-        .useInteractiveGuideline(true)
-  ;
+function drawChart(data) {
+    nv.addGraph(function() {
+      var chart = nv.models.lineChart()
+            .useInteractiveGuideline(true)
+      ;
 
-  chart.xAxis
-      .axisLabel('Time (ms)')
-      .tickFormat(d3.format(',r'));
+      chart.xAxis
+          .axisLabel('Time (ms)')
+          .tickFormat(d3.format(',r'));
 
-  chart.yAxis
-      .axisLabel('Voltage (v)')
-      .tickFormat(d3.format('.02f'));
+      chart.yAxis
+          .axisLabel('Voltage (v)')
+          .tickFormat(d3.format('.02f'));
 
-  d3.select('#chart svg')
-      .datum(data())
-    .transition().duration(500)
-      .call(chart);
+      d3.select('#chart svg')
+          .datum(data)
+        .transition().duration(500)
+          .call(chart);
 
-  nv.utils.windowResize(chart.update);
+      nv.utils.windowResize(chart.update);
 
-  return chart;
-});
+      return chart;
+    });
+}
 
+function parseToXY(response) {
+      var formattedData;
+      var data = {};
+      var schools = [];
+    
+      schools = _.chain(response)
+          .map(function(elem) {
+              return elem.school_name
+          })
+          .unique(false)
+          .value();
+
+      _.each(schools, function(elem) {
+          data[elem] = [];
+      });
+
+      _.each(response, function(elem) {
+          data[elem.school_name].push(
+              {
+                  x: elem.school_year.split("/")[0],
+                  y: elem.score
+              })
+      });
+    
+      formattedData = _.map(data, function(v, k) {
+          return { key: k, values: v }
+      });
+
+      return formattedData
+}
