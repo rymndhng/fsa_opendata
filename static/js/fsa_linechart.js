@@ -1,10 +1,20 @@
+var chartData = {}
+
 function fetchDataAndDrawChart() {
-    d3.json("/fsa/data", function(data) {
-        drawChart(parseToXY(data));
+    d3.json("/fsa/data?school_id=1", function(data) {
+        addData(parseToXY(data));
+        drawChart();
     });
 }
 
-function drawChart(data) {
+function addData(data) {
+    for (var i=0; i < data.length; i++) {
+        obj = data[i];
+        chartData[obj.key] = obj;
+    }
+}
+
+function drawChart() {
     nv.addGraph(function() {
       var chart = nv.models.lineChart()
             .useInteractiveGuideline(true)
@@ -19,7 +29,7 @@ function drawChart(data) {
           .tickFormat(d3.format('.02f'));
 
       d3.select('#chart svg')
-          .datum(data)
+          .datum(_.values(chartData))
         .transition().duration(500)
           .call(chart);
 

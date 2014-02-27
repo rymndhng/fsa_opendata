@@ -8,12 +8,34 @@
     <script src="/static/js/lib/underscore.js"></script>
 
     <link href="/static/css/nv.d3.css" rel="stylesheet" type="text/css">
+
+    <script>
+        function fetchSchoolData() {
+            var school_select_element = document.querySelector( "#school-select" );
+            var school_id = school_select_element.value;
+            console.log("foo!");
+            d3.json("/fsa/data?school_id=" + school_id, function(data) {
+                addData(parseToXY(data));
+                drawChart();
+            });
+        }
+    </script>
+
 </head>
 
 <body>
     <div id="chart">
       <svg style="height: 400px"></svg>
     </div>
+
+    <select id="school-select">
+        {% for school in schools %}
+        <option value={{school.id}}>{{school.name}}</option>
+        {% endfor %}
+    </select>
+    <button onClick="fetchSchoolData()">Add</button>
+
+
     <script src="/static/js/fsa_linechart.js"></script>
     <script>
         fetchDataAndDrawChart();
