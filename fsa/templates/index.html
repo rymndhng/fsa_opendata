@@ -28,6 +28,10 @@
       <svg style="height: 400px"></svg>
     </div>
 
+    <select id="district-select" onChange="fetchSchools(this.value)">
+        <!-- Fill this dynamically with js -->
+    </select>
+
     <select id="school-select">
         {% for school in schools %}
         <option value={{school.id}}>{{school.name}}</option>
@@ -35,10 +39,11 @@
     </select>
     <button onClick="fetchSchoolData()">Add</button>
 
-
     <script src="/static/js/fsa_linechart.js"></script>
     <script>
-        fetchDataAndDrawChart();
+        // No Data. Just draw chart as placeholder.
+        fetchDistricts();
+        drawChart();
     </script>
 </body>
 

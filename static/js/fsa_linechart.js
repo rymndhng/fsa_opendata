@@ -1,9 +1,56 @@
 var chartData = {}
+var districts;
+var schools;
 
-function fetchDataAndDrawChart() {
-    d3.json("/fsa/data?school_id=1", function(data) {
-        addData(parseToXY(data));
-        drawChart();
+function alphabeticalSortComparator(a, b){ 
+    var nameA = a[1].toLowerCase().replace(/\W+/g, "");
+    var nameB = b[1].toLowerCase().replace(/\W+/g, "");
+    console.log(nameA + "--" + nameB + "--" + (nameA > nameB));
+    if (nameA < nameB) 
+        return -1;
+    else if (nameA > nameB)
+        return 1;
+    else 
+        return 0;
+}
+
+function fetchDistricts() {
+    d3.json("/fsa/districts", function(data) {
+        districts = data;
+        districts = districts.sort(alphabeticalSortComparator);
+        console.log(districts);
+
+        district_select = document.querySelector("#district-select");
+        for(var i=0; i < districts.length; i++) {
+            pair = districts[i];
+            id = pair[0];
+            district_name = pair[1] ;
+            new_option = document.createElement("option");
+            new_option.setAttribute("value", id);
+            if (!district_name) district_name = "Other...";
+            new_option.innerHTML = district_name
+            district_select.appendChild(new_option);
+        }
+    });
+}
+
+function fetchSchools(district_id) {
+    d3.json("/fsa/districts/" + district_id + "/schools/", function(data) {
+        schools = data;
+        schools = schools.sort(alphabeticalSortComparator);
+        console.log(schools);
+        school_select = document.querySelector("#school-select");
+        school_select.innerHTML = "";
+        for(var i=0; i < schools.length; i++) {
+            pair = schools[i];
+            id = pair[0];
+            school_name = pair[1] ;
+            new_option = document.createElement("option");
+            new_option.setAttribute("value", id);
+            if (!school_name) school_name = "Other...";
+            new_option.innerHTML = school_name
+            school_select.appendChild(new_option);
+        }
     });
 }
 
