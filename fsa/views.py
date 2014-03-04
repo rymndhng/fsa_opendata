@@ -6,6 +6,8 @@ from django.shortcuts import render_to_response
 
 from fsa.models import Record, School, District
 
+def index(request):
+    return HttpResponse("Hello World!")
 
 def line_chart(request):
     schools = School.objects.all()
