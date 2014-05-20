@@ -1,10 +1,11 @@
 import json
 import random
+import time
 
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 
-from fsa.models import Record, School, District
+from fsa.models import Record, School, District, SchoolMetadata
 
 def index(request):
     return HttpResponse("Hello World!")
@@ -12,7 +13,7 @@ def index(request):
 def line_chart(request):
     schools = School.objects.all()
     districts = District.objects.all()
-    data_dict = {"schools": schools, "districts": districts}
+    data_dict = {"schools": schools, "districts": districts, "timestamp": time.time()}
     return render_to_response("index.html", data_dict)
 
 
@@ -34,7 +35,7 @@ def districts(request):
 
 
 def schools(request, district_id):
-    response_data = [(s.id, s.name) for s in School.objects.filter(district_id=district_id)]
+    response_data = [s.to_dict() for s in SchoolMetadata.objects.filter(district_number=district_id)]
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 

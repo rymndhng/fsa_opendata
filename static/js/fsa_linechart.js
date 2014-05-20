@@ -2,15 +2,15 @@ var chartData = {}
 var districts;
 var schools;
 
-function alphabeticalSortComparator(a, b){ 
+function alphabeticalSortComparator(a, b){
     var nameA = a[1].toLowerCase().replace(/\W+/g, "");
     var nameB = b[1].toLowerCase().replace(/\W+/g, "");
     console.log(nameA + "--" + nameB + "--" + (nameA > nameB));
-    if (nameA < nameB) 
+    if (nameA < nameB)
         return -1;
     else if (nameA > nameB)
         return 1;
-    else 
+    else
         return 0;
 }
 
@@ -90,7 +90,7 @@ function parseToXY(response) {
       var formattedData;
       var data = {};
       var schools = [];
-    
+
       schools = _.chain(response)
           .map(function(elem) {
               return elem.school_name
@@ -109,10 +109,18 @@ function parseToXY(response) {
                   y: elem.score
               })
       });
-    
+
       formattedData = _.map(data, function(v, k) {
           return { key: k, values: v }
       });
 
       return formattedData
 }
+
+// google maps stuff
+var mapOptions = {
+    center: new google.maps.LatLng(-34.397, 150.644),
+      zoom: 8
+};
+
+var map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);

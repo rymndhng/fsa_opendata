@@ -2,7 +2,7 @@
 
 <head>
     <title>FSA</title>
-
+    <script type="text/javascript" src="//maps.googleapis.com/maps/api/js?key=AIzaSyAjoxyPtkABUURA4tMqPyuJI8BsqIxS9Jg&sensor=true"></script>
     <script src="/static/js/lib/d3.v3.js"></script>
     <script src="/static/js/lib/nv.d3.js"></script>
     <script src="/static/js/lib/underscore.js"></script>
@@ -37,9 +37,11 @@
         <option value={{school.id}}>{{school.name}}</option>
         {% endfor %}
     </select>
+
     <button onClick="fetchSchoolData()">Add</button>
 
-    <script src="/static/js/fsa_linechart.js"></script>
+    <div id="map-canvas" style="width: 100%; height: 100%"></div>
+    <script src="/static/js/fsa_linechart.js?_ts={{timestamp}}"></script>
     <script>
         // No Data. Just draw chart as placeholder.
         fetchDistricts();
