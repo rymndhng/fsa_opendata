@@ -12,9 +12,9 @@
     <script>
         function fetchSchoolData() {
             var school_select_element = document.querySelector( "#school-select" );
-            var school_id = school_select_element.value;
+            var params = school_select_element.value;
             console.log("foo!");
-            d3.json("/fsa/data?school_id=" + school_id, function(data) {
+            d3.json("/fsa/data?"+params, function(data) {
                 addData(parseToXY(data));
                 drawChart();
             });
@@ -34,7 +34,7 @@
 
     <select id="school-select">
         {% for school in schools %}
-        <option value={{school.id}}>{{school.name}}</option>
+        <option value="school_name={{school.school_name}}&district_id={{school.district_number}}">{{school.school_name}}</option>
         {% endfor %}
     </select>
 

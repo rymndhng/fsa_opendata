@@ -8,7 +8,7 @@ class DistrictInfo(models.Model):
     class Meta:
         abstract = True
 
-    district_number = IntegerField()
+    district_number = IntegerField(db_index=True)
     district_name = CharField(max_length=50)
 
 
@@ -38,6 +38,12 @@ class CommonRecord(models.Model):
     score_type = CharField(max_length=25, null=True)
     score = FloatField(null=True)
     participation_rate = IntegerField(null=True)
+
+    def to_dict(self):
+        data = {}
+        for field_name in self._meta.get_all_field_names():
+            data[field_name] = getattr(self, field_name)
+        return data
 
 
 ################################################################################
@@ -80,3 +86,8 @@ class SchoolMetadata(models.Model):
     has_elementary_grades_flag = BooleanField()
     has_secondary_grades_flag = BooleanField()
 
+    def to_dict(self):
+        data = {}
+        for field_name in self._meta.get_all_field_names():
+            data[field_name] = getattr(self, field_name)
+        return data
