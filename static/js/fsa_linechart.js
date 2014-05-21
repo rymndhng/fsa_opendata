@@ -41,16 +41,17 @@ function fetchSchools(district_id) {
         console.log(schools);
         school_select = document.querySelector("#school-select");
         school_select.innerHTML = "";
-        for(var i=0; i < schools.length; i++) {
-            pair = schools[i];
-            id = pair[0];
-            school_name = pair[1] ;
-            new_option = document.createElement("option");
-            new_option.setAttribute("value", id);
+
+        schools.forEach(function(elem) {
+            var district_id = elem[0];
+            var school_name = elem[1];
+            var query_params = "district_id="+district_id+"&school_name="+school_name;
+            var new_option = document.createElement("option");
+            new_option.setAttribute("value", query_params);
             if (!school_name) school_name = "Other...";
-            new_option.innerHTML = school_name
+            new_option.innerHTML = school_name;
             school_select.appendChild(new_option);
-        }
+        });
     });
 }
 
