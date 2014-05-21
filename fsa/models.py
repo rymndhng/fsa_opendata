@@ -1,30 +1,62 @@
 from django.db import models
-from django.db.models import IntegerField, CharField, BooleanField
+from django.db.models import IntegerField, CharField, BooleanField, FloatField
+
+# parent record
+class DistrictInfo(models.Model):
+    """ Contains shared district level fields """
+
+    class Meta:
+        abstract = True
+
+    district_number = IntegerField()
+    district_name = CharField(max_length=50)
 
 
-class Record(models.Model):
+class CommonRecord(models.Model):
+    """ Contains the record - level fields """
+
+    class Meta:
+        abstract = True
+
     school_year = CharField(max_length=20)
-    school_id = IntegerField()
+    public_or_independent = CharField(max_length=22)
+    sub_population = CharField(max_length=23)
     fsa_skill_code = CharField(max_length=50)
     grade = IntegerField()
-    sub_population = CharField(max_length=50)
-    number_writers = IntegerField()
-    participation_rate = IntegerField()
-    score = IntegerField()
+    number_expected_writers = IntegerField(null=True)
+    number_writers = IntegerField(null=True)
+    number_unknown = IntegerField(null=True)
+    percent_unknown = FloatField(null=True)
+    number_below = IntegerField(null=True)
+    percent_below = FloatField(null=True)
+    number_meeting = IntegerField(null=True)
+    percent_meeting = FloatField(null=True)
+    number_exceeding = IntegerField(null=True)
+    percent_exceeding = FloatField(null=True)
+    number_meet_or_exceed = IntegerField(null=True)
+    percent_meet_or_exceed = FloatField(null=True)
+    score_type = CharField(max_length=25, null=True)
+    score = FloatField(null=True)
+    participation_rate = IntegerField(null=True)
 
-    def to_dict(self):
-        data = {}
-        for field_name in self._meta.get_all_field_names():
-            data[field_name] = getattr(self, field_name)
 
-        # TODO - Hack! Clean this up
-        data['school_name'] = School.objects.get(id=self.school_id).name
+################################################################################
+#
+#                       Concrete Models
+#
+################################################################################
 
-        return data
+class ProvincialRecord(CommonRecord):
+    pass
 
-class School(models.Model):
-    district_id = IntegerField()
-    name = CharField(max_length=100, db_index=True)
+
+class DistrictRecord(DistrictInfo, CommonRecord):
+    pass
+
+
+class SchoolRecord(DistrictInfo, CommonRecord):
+    school_name = CharField(max_length = 50)
+    school_number = IntegerField()
 
 
 class SchoolMetadata(models.Model):
@@ -48,6 +80,3 @@ class SchoolMetadata(models.Model):
     has_elementary_grades_flag = BooleanField()
     has_secondary_grades_flag = BooleanField()
 
-
-class District(models.Model):
-    name = CharField(max_length=100, db_index=True)
