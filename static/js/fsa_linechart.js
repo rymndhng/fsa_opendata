@@ -5,7 +5,7 @@ var schools;
 function alphabeticalSortComparator(a, b){
     var nameA = a[1].toLowerCase().replace(/\W+/g, "");
     var nameB = b[1].toLowerCase().replace(/\W+/g, "");
-    console.log(nameA + "--" + nameB + "--" + (nameA > nameB));
+    // console.log(nameA + "--" + nameB + "--" + (nameA > nameB));
     if (nameA < nameB)
         return -1;
     else if (nameA > nameB)
@@ -14,31 +14,12 @@ function alphabeticalSortComparator(a, b){
         return 0;
 }
 
-function fetchDistricts() {
-    d3.json("/fsa/districts", function(data) {
-        districts = data;
-        districts = districts.sort(alphabeticalSortComparator);
-        console.log(districts);
-
-        district_select = document.querySelector("#district-select");
-        for(var i=0; i < districts.length; i++) {
-            pair = districts[i];
-            id = pair[0];
-            district_name = pair[1] ;
-            new_option = document.createElement("option");
-            new_option.setAttribute("value", id);
-            if (!district_name) district_name = "Other...";
-            new_option.innerHTML = district_name
-            district_select.appendChild(new_option);
-        }
-    });
-}
 
 function fetchSchools(district_id) {
     d3.json("/fsa/districts/" + district_id + "/schools/", function(data) {
         schools = data;
         schools = schools.sort(alphabeticalSortComparator);
-        console.log(schools);
+        // console.log(schools);
         school_select = document.querySelector("#school-select");
         school_select.innerHTML = "";
 
@@ -120,8 +101,71 @@ function parseToXY(response) {
 
 // google maps stuff
 var mapOptions = {
-    center: new google.maps.LatLng(-34.397, 150.644),
-      zoom: 8
+    center: new google.maps.LatLng(49.2515436,-123.1049354),
+    zoom: 12
 };
 
 var map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+
+d3.json("schools", function(resp) {
+
+    // ----------------- LOAD Typeahead/Bloodhoud
+    var schoolMatcher = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        local: $.map(resp, function(s) { return {value: [s.school_name, s.district_long_name_this_enrol, s.school_city, s.physical_school_address].join(' ')}})
+    });
+
+    schoolMatcher.initialize();
+
+    $('.typeahead').typeahead({
+        hint: true,
+        highlight: true,
+        minLength: 1
+    },
+    {
+        name: 'states',
+        displayKey: 'value',
+        source: schoolMatcher.ttAdapter()
+    });
+
+
+    // ----------------- LOAD MAPS VIS
+    $('#map-canvas').on('click', '.add-school', function(e) {
+        console.log("foo");
+    });
+
+    var _template =
+        "<p>"+
+            "<h5>{{school_name}}</h5>"+
+            "{{school_address}}"+
+        "</p>"+
+        "<div>"+
+            "<button class='btn btn-primary btn-xs add-school' value='{{district_id}}.{{school_id}}'>Add to chart!</button>"+
+        "</div>";
+
+    var infowindow = new google.maps.InfoWindow({
+    });
+
+    resp.forEach(function(s) {
+        // define content
+        var content = _template.split("{{school_name}}").join(s.school_name)
+                               .split("{{district_id}}").join(s.district_number)
+                               .split("{{school_id}}").join(s.id)
+                               .split("{{school_address}}").join(s.school_physical_address);
+
+        var latlng = new google.maps.LatLng(s.school_latitude, s.school_longitude);
+        var marker = new google.maps.Marker({
+            position: latlng,
+            title: "Hello World!"
+        });
+        marker.setMap(map);
+
+        google.maps.event.addListener(marker, 'click', function() {
+            infowindow.setContent(content);
+            infowindow.latlng = latlng;
+            infowindow.open(map, this);
+        });
+    });
+});
+

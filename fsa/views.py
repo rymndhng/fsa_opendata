@@ -4,6 +4,8 @@ import time
 
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
+from django.views.decorators.gzip import gzip_page
+
 
 from fsa.models import SchoolRecord, DistrictRecord, SchoolMetadata
 
@@ -71,7 +73,20 @@ def schools(request, district_id):
             "has_elementary_grades_flag": True,
             "school_year": "2013/2014"}
 
-    response_data = [(s.district_number, s.school_name) for s in SchoolMetadata.objects.filter(**filters)]
+    response_data = [s.to_dict() for s in SchoolMetadata.objects.filter(**filters)]
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+@gzip_page
+def coast_school_meta(request):
+    # elementary schools in coast
+    schools = SchoolMetadata.objects \
+                .filter(district_number__gte = metrocoast_min,
+                        district_number__lte = metrocoast_max,
+                        school_facility_type__exact = "Standard",
+                        has_elementary_grades_flag__exact = True,
+                        school_year__exact = "2013/2014")
+
+    response_data = [s.to_dict() for s in schools]
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 
