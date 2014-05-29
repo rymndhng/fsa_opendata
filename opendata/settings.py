@@ -84,5 +84,5 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = '/var/opendata/static/'
-STATICFILES_DIRS = ('/home/ldinh/opendata/static/', )
+STATICFILES_DIRS = ('/home/ldinh/opendata/static/', os.path.join(BASE_DIR, "static"))
 
