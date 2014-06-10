@@ -14,8 +14,8 @@ def index(request):
 
 
 # Interested school districts in lower mainland ish
-metrocoast_min = 37
-metrocoast_max = 41
+metrocoast_min = 39
+metrocoast_max = 39
 VANCOUER_DISTRICT_ID = 39
 
 def line_chart(request):

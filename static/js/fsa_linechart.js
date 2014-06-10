@@ -1,12 +1,18 @@
+/* global Handlebars */
 var chartData = {};
 var districts;
 var schools;
+
+// draw the initial empty chart
+drawChart();
 
 function drawError(msg) {
     var template = Handlebars.compile("<div class='alert alert-warning'>{{msg}}</div>");
     var content = $(template({msg: msg}));
     $("#notification-console").append(content);
-    setTimeout(function() { content.fadeOut(500, function() { $(this).remove()}) }, 1000);
+    setTimeout(function() {
+        content.fadeOut(500, function() { $(this).remove();});
+    }, 1000);
 }
 
 function addData(data) {
@@ -22,7 +28,7 @@ function addData(data) {
 (function() {
     var van_data = parseToXY(vancouver_data);
     van_data[0].key = "Vancouver District Average";
-    addData(van_data)
+    addData(van_data);
 })();
 
 function drawChart() {
@@ -56,7 +62,7 @@ function parseToXY(response) {
 
       schools = _.chain(response)
           .map(function(elem) {
-              return elem.school_name
+              return elem.school_name;
           })
           .unique(false)
           .value();
@@ -70,14 +76,14 @@ function parseToXY(response) {
               {
                   x: elem.school_year.split("/")[0],
                   y: elem.score
-              })
+              });
       });
 
       formattedData = _.map(data, function(v, k) {
-          return { key: k, values: v }
+          return { key: k, values: v };
       });
 
-      return formattedData
+      return formattedData;
 }
 
 // ------------- Setup Google Maps
@@ -113,6 +119,16 @@ $.when(polygonDeferred, schoolsDeferred).then(function (polygons, schools) {
     });
 });
 
+
+// parse templates
+var templates = {
+    infowindow: {
+        neighborhood: Handlebars.compile($('#neighborhood-infowindow').html()),
+        school: Handlebars.compile($("#school-infowindow").html())
+    }
+};
+
+
 // ---------------- Adding Neighborhood Information
 function useTheData(documents) {
     // parse all the document data
@@ -121,14 +137,20 @@ function useTheData(documents) {
        // TODO: resolve should only be called once.
        polygonDeferred.resolve(doc.gpolygons);
 
+       // Adding event listeners for each polygon
        doc.gpolygons.forEach(function (polygon) {
            
            google.maps.event.addListener(polygon, 'click', function(elem) {
-               var content = _.pluck(neighborhoodToSchools[polygon.title].schools, "school_name").join(", ");
-               infowindow.setContent("Schools in area: " + content);
+               var context = {
+                   name: polygon.title,
+                   schools: _.pluck(neighborhoodToSchools[polygon.title].schools, "school_name")
+               };
+
+               infowindow.setContent(templates.infowindow.neighborhood(context));
                infowindow.latlng = elem.latLng;
                infowindow.open(map);
            });
+
        });
     });
 }
@@ -152,6 +174,13 @@ function addSchool(district_id, school_name) {
 }
 
 // --------------- Event Handlers 
+$('#map-canvas').on('click', '.add-neighborhood', function(e) {
+    var neighborhood_name = e.target.value;
+    neighborhoodToSchools[neighborhood_name].schools.forEach(function(school) {
+        addSchool(school.district_number, school.school_name);
+    });
+});
+
 $('#map-canvas').on('click', '.add-school', function(e) {
     var district_id, school_name;
     results = e.target.value.split(":");
@@ -170,22 +199,9 @@ d3.json("schools", function(resp) {
     var gmap_markers = {};
 
     // ----------------- LOAD MAPS VIS
-    var _template =
-        "<p>"+
-            "<h5>{{school_name}}</h5>"+
-            "{{school_address}}"+
-        "</p>"+
-        "<div>"+
-            "<button class='btn btn-primary btn-xs add-school' value='{{district_id}}:{{school_name}}'>Add to chart!</button>"+
-        "</div>";
-
 
     schoolsDeferred.resolve(resp);
     resp.forEach(function(s) {
-        // define content
-        var content = _template.split("{{school_name}}").join(s.school_name)
-                               .split("{{district_id}}").join(s.district_number)
-                               .split("{{school_address}}").join(s.school_physical_address);
 
         var latlng = new google.maps.LatLng(s.school_latitude, s.school_longitude);
         var marker = new google.maps.Marker({
@@ -198,7 +214,13 @@ d3.json("schools", function(resp) {
         gmap_markers[hash_school_key(s)] = marker;
             
         google.maps.event.addListener(marker, 'click', function() {
-            infowindow.setContent(content);
+            var context = {
+                school_name: s.school_name,
+                school_address: s.school_physical_address,
+                district_id: s.district_number
+            }; 
+
+            infowindow.setContent(templates.infowindow.school(context));
             infowindow.latlng = latlng;
             infowindow.open(map, this);
         });

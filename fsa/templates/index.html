@@ -7,9 +7,9 @@
     <script src="/static/js/lib/nv.d3.js"></script>
     <script src="/static/js/lib/underscore.js"></script>
     <script src="/static/js/lib/geoxmlv3.js"></script>
+    <script src="/static/js/lib/handlebars-v1.3.0.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="//twitter.github.io/typeahead.js/releases/latest/typeahead.bundle.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.4/handlebars.min.js"></script>
     <link href="/static/css/nv.d3.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 
@@ -75,19 +75,19 @@
     .tt-suggestion p {
         margin: 0;
     }
-    </style>
 
-    <script>
-        function fetchSchoolData() {
-            var school_select_element = document.querySelector("#school-select");
-            var params = school_select_element.value;
-            console.log("foo!");
-            d3.json("/fsa/data?"+params, function(data) {
-                addData(parseToXY(data));
-                drawChart();
-            });
-        }
-    </script>
+    .school-list {
+        list-style-type: none;
+        margin-left: -30px;
+    }
+
+    .school-list li {
+        width: 200px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+    </style>
 </head>
 
 <body>
@@ -99,14 +99,14 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-8">
+            <div class="col-md-6">
                 <div id="chart">
                   <svg style="height: 400px"></svg>
                 </div>
                 <div id="notification-console">
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <div class="row">
                     <div class="col-md-12">
                     <input class="typeahead" type="text" placeholder="Search for a school..."></input>
@@ -125,13 +125,30 @@
         </div>
     </div>
 
+    {% verbatim %}
+    <template id="neighborhood-infowindow">
+      <h4>{{name}}</h4>
+      <ul class="school-list">
+        {{#each schools}}
+        <li>{{this}}</li>
+        {{/each}}
+      </ul>
+      <button class="btn btn-primary btn-xs add-neighborhood" value="{{name}}">Add All Schools To Chart</button>
+    </template>
+    <template id="school-infowindow">
+      <p>
+        <h5>{{school_name}}</h5>
+        {{school_address}}
+      </p>
+      <button class="btn btn-primary btn-xs add-school"
+              value="{{district_id}}:{{school_name}}">Add School To Chart
+      </button>
+    </template>
+    {% endverbatim %}
+
     <script type"text/javascript">
         var vancouver_data = {{vancouver_stats|safe}};
     </script>
     <script src="/static/js/fsa_linechart.js?_ts={{timestamp}}"></script>
-    <script>
-        drawChart();
-    </script>
 </body>
-
 </html>
