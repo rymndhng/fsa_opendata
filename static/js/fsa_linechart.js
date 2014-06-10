@@ -34,10 +34,11 @@ function addData(data) {
 function drawChart() {
     nv.addGraph(function() {
       var chart = nv.models.lineChart()
-            .useInteractiveGuideline(true);
+              .useInteractiveGuideline(true)
+              .showYAxis(true);
 
       chart.xAxis
-          .axisLabel('Year')
+          .axisLabel('School Year')
           .tickFormat(d3.format('04d'));
 
       chart.yAxis
@@ -89,7 +90,8 @@ function parseToXY(response) {
 // ------------- Setup Google Maps
 var mapOptions = {
     center: new google.maps.LatLng(49.2515436,-123.1049354),
-    zoom: 12
+    zoom: 12,
+    scrollwheel: false
 };
 
 var map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
@@ -158,6 +160,7 @@ function useTheData(documents) {
 var infowindow = new google.maps.InfoWindow({});
 var geoXml = new geoXML3.parser({
     map: map,
+    zoom: false,
     singleInfoWindow: true,
     infoWindow: infowindow,
     processStyles: true,
@@ -254,13 +257,15 @@ d3.json("schools", function(resp) {
 
     $('.typeahead').on('typeahead:selected', function(e, s) {
         // define content
-        var content = _template.split("{{school_name}}").join(s.school_name)
-                               .split("{{district_id}}").join(s.district_number)
-                               .split("{{school_address}}").join(s.school_physical_address);
-
+        var context = {
+            school_name: s.school_name,
+            school_address: s.school_physical_address,
+            district_id: s.district_number
+        }; 
+        
         var latlng = new google.maps.LatLng(s.school_latitude, s.school_longitude);
 
-        infowindow.setContent(content);
+        infowindow.setContent(templates.infowindow.school(context));
         infowindow.latlng = latlng;
         infowindow.open(map, gmap_markers[hash_school_key(s)]);
 
