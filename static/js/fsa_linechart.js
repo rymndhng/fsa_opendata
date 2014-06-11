@@ -1,4 +1,4 @@
-/* global Handlebars */
+/* global Handlebars, Ractive */
 var chartData = {};
 var districts;
 var schools;
@@ -18,7 +18,10 @@ function addData(data) {
         drawError("Selected school does not have any FSA scores in this period");
     }
     for (var i=0; i < data.length; i++) {
-        chartData[data[i].key] = data[i];
+        if (!chartData[data[i].key]) {
+            selectedSchools.push(data[i].key);
+            chartData[data[i].key] = data[i];
+        }
     }
 }
 
@@ -28,8 +31,10 @@ var chart;
 nv.addGraph(function() {
 
     chart = nv.models.lineChart()
-            .useInteractiveGuideline(true)
-            .showYAxis(true);
+        .margin({left: 25})
+        .useInteractiveGuideline(true)
+        .showLegend(false)
+        .showYAxis(true);
 
     chart.xAxis
         .axisLabel('School Year')
@@ -57,13 +62,6 @@ function drawChart() {
         .call(chart);
 }
 
-// A little hack to get Vancouver averages on the list
-(function() {
-    var van_data = parseToXY(vancouver_data);
-    van_data[0].key = "Vancouver District Average";
-    addData(van_data);
-    // draw the initial empty chart
-})();
 
 
 function parseToXY(response) {
@@ -285,4 +283,37 @@ d3.json("schools", function(resp) {
 
 
 });
+
+
+//======================================================================
+// bring things to life using ractive.js
+//----------------------------------------------------------------------
+
+var selectedSchools = _.chain(chartData).values().pluck("key").value();
+
+var schoolsSelected = new Ractive({
+    el: "#school-selected",
+    template: "#current-schools",
+    data: {
+        schools: selectedSchools,
+        color: nv.utils.defaultColor()
+    }
+});
+
+schoolsSelected.on({
+    removeEntry: function(event, index) {
+        selectedSchools.splice(index, 1);
+        // sync this with the graph
+        chartData = _.pick(chartData, selectedSchools);
+        drawChart();
+    },
+});
+
+// A little hack to get Vancouver averages on the list
+(function() {
+    var van_data = parseToXY(vancouver_data);
+    van_data[0].key = "Vancouver District Average";
+    addData(van_data);
+    // draw the initial empty chart
+})();
 

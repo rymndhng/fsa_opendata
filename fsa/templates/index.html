@@ -10,9 +10,10 @@
     <script src="/static/js/lib/handlebars-v1.3.0.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="//twitter.github.io/typeahead.js/releases/latest/typeahead.bundle.js"></script>
+    <script src='http://cdn.ractivejs.org/latest/ractive.js'></script>
     <link href="/static/css/nv.d3.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>          
     <style>
     /* Stealing styling from http://stackoverflow.com/questions/12013532/inline-style-tags-vs-inline-css-properties */
     .twitter-typeahead {
@@ -88,6 +89,17 @@
         overflow: hidden;
     }
 
+    .boxed span {
+        line-height: 30px;
+    }
+
+    .boxed > span:hover {
+        box-shadow: 0px 0px 9px #AAA;
+    }
+
+    .boxed .glyphicon {
+        cursor: pointer; cursor: hand;
+    }
     </style>
 </head>
 
@@ -109,15 +121,16 @@
     <div class="container">
         <div class="row">
           <div class="col-md-12">
-            <h5>Selected Schools</h5>
+            <h4>Selected Schools</h4>
+            <div id="school-selected"></div>
           </div>
-            <div class="col-md-12">
-                <div id="chart">
-                  <svg style="height: 500px"></svg>
-                </div>
-                <div id="notification-console">
-                </div>
-            </div>
+        </div>
+        <div class="col-md-12">
+          <div id="chart">
+            <svg style="height: 500px"></svg>
+          </div>
+          <div id="notification-console">
+          </div>
         </div>
         <div id="footer" class="row">
           <h5> Dataset provided by http://www.data.gov.bc.ca/ </h5>
@@ -143,8 +156,24 @@
               value="{{district_id}}:{{school_name}}">Add School To Chart
       </button>
     </template>
-    {% endverbatim %}
 
+    <script type="text/ractive" id="current-schools">
+      <h4>
+        <div class="boxed">
+          {{#schools:i}}
+          <span class="label" style="background-color: {{ color(this, i) }}">
+            {{this}}
+            {{# i != 0}}
+            <span on-click="removeEntry:{{i}}" class="glyphicon glyphicon-remove"></span>
+            {{/ i != 0}} 
+          </span>
+          &nbsp;
+          {{/schools}}
+        </div>
+      </h4>
+    </script>
+    
+    {% endverbatim %}
     <script type"text/javascript">
       var vancouver_data = {{vancouver_stats|safe}};
     </script>
