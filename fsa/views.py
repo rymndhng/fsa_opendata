@@ -14,8 +14,8 @@ def index(request):
 
 
 # Interested school districts in lower mainland ish
-metrocoast_min = 39
-metrocoast_max = 39
+metrocoast_min = 38
+metrocoast_max = 41
 VANCOUER_DISTRICT_ID = 39
 
 def line_chart(request):
@@ -78,7 +78,7 @@ def coast_school_meta(request):
     schools = SchoolMetadata.objects \
                 .filter(district_number__gte = metrocoast_min,
                         district_number__lte = metrocoast_max,
-                        grade_string__contains = "7",
+                        grade_string__exact= "K-7",
                         school_facility_type__exact = "Standard",
                         has_elementary_grades_flag__exact = True,
                         school_year__exact = "2013/2014")
