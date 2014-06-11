@@ -78,6 +78,7 @@ def coast_school_meta(request):
     schools = SchoolMetadata.objects \
                 .filter(district_number__gte = metrocoast_min,
                         district_number__lte = metrocoast_max,
+                        grade_string__contains = "7",
                         school_facility_type__exact = "Standard",
                         has_elementary_grades_flag__exact = True,
                         school_year__exact = "2013/2014")

@@ -3,8 +3,6 @@ var chartData = {};
 var districts;
 var schools;
 
-// draw the initial empty chart
-drawChart();
 
 function drawError(msg) {
     var template = Handlebars.compile("<div class='alert alert-warning'>{{msg}}</div>");
@@ -24,37 +22,49 @@ function addData(data) {
     }
 }
 
+
+var chart;
+
+nv.addGraph(function() {
+
+    chart = nv.models.lineChart()
+            .useInteractiveGuideline(true)
+            .showYAxis(true);
+
+    chart.xAxis
+        .axisLabel('School Year')
+        .tickFormat(d3.format('04d'));
+
+    chart.yAxis
+        .axisLabel('FSA Math Score')
+        .tickFormat(d3.format('02d'));
+
+    d3.select('#chart svg')
+        .datum(_.values(chartData))
+        .transition().duration(500)
+        .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+});
+
+
+function drawChart() {
+    d3.select('#chart svg')
+        .datum(_.values(chartData))
+        .transition().duration(500)
+        .call(chart);
+}
+
 // A little hack to get Vancouver averages on the list
 (function() {
     var van_data = parseToXY(vancouver_data);
     van_data[0].key = "Vancouver District Average";
     addData(van_data);
+    // draw the initial empty chart
 })();
 
-function drawChart() {
-    nv.addGraph(function() {
-      var chart = nv.models.lineChart()
-              .useInteractiveGuideline(true)
-              .showYAxis(true);
-
-      chart.xAxis
-          .axisLabel('School Year')
-          .tickFormat(d3.format('04d'));
-
-      chart.yAxis
-          .axisLabel('FSA Math Score')
-          .tickFormat(d3.format('02d'));
-
-      d3.select('#chart svg')
-          .datum(_.values(chartData))
-          .transition().duration(500)
-          .call(chart);
-
-      nv.utils.windowResize(chart.update);
-
-      return chart;
-    });
-}
 
 function parseToXY(response) {
       var formattedData;
