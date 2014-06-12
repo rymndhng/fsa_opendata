@@ -217,7 +217,8 @@ d3.json("schools", function(resp) {
         var latlng = new google.maps.LatLng(s.school_latitude, s.school_longitude);
         var marker = new google.maps.Marker({
             position: latlng,
-            title: "Hello World!"
+            title: s.school_name,
+            icon: "/static/school.png"
         });
         marker.setMap(map);
 
