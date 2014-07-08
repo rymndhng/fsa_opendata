@@ -348,6 +348,7 @@ var addedSchoolsSet = {};
 function addSchoolTableData(newData) {
     schoolData.push({
         title: newData[0].school_name || (newData[0].district_name + " District"),
+        fixed: !newData[0].school_name,
         gr7_math: _.where(newData, {
             fsa_skill_code: "Numeracy",
             grade: 7,
@@ -364,7 +365,7 @@ function addSchoolTableData(newData) {
 
 var schoolTableConfig = {
    sparkline: {
-       height: 15,
+       height: 25,
        width: 60
    }
 }
@@ -373,6 +374,7 @@ var schoolsData = new Ractive({
     el: "#school-table",
     template: "#school-table-template",
     data: {
+        years: [2007,2008,2009,2010,2011,2012],
         schools: schoolData,
         config: schoolTableConfig,
         sparkline: function(series, height, width) {
@@ -390,8 +392,43 @@ var schoolsData = new Ractive({
                 .range([0, height]);
 
             return xValues.map(xScale).zip(yValues.map(yScale).value()).flatten().value().join(',');
+        },
+        scores: function(series) {
+           return _.chain(series).sortBy("school_year").pluck("score").value();
+        },
+        scores_diff: function(series, seriesName) {
+           var seriesData = schoolsData.data.scores(series);
+           var vanAvg = schoolsData.data.scores(schoolsData.data.schools[0][seriesName]);
+           return _.zip(seriesData, vanAvg).map(function(x) { return x[0] - x[1];});
+        },
+        sort: function(array, column) {
+          array = array.slice();
+          return array.sort( function(a,b) {
+            return a[column] < b[column] ? -1 : 1;
+          });
+        },
+        diff_color_status: function(value) {
+           if (value < 0) {
+               return "red";
+           } else if (value > 0) {
+               return "green";
+           } else {
+               return "#B7B7B7";
+           }
         }
     }
+});
+
+schoolsData.on('showType', function() {
+   console.log("foo");
+});
+
+schoolsData.on('removeRow', function(event, index) {
+   schoolData.splice(index,1);
+});
+
+schoolsData.on('sort', function (event, column) {
+   this.set('sortColumn', column);
 });
 
 addSchoolTableData(vancouver_data);

@@ -12,6 +12,7 @@
     <script src="//twitter.github.io/typeahead.js/releases/latest/typeahead.bundle.js"></script>
     <script src='http://cdn.ractivejs.org/latest/ractive.js'></script>
     <link href="/static/css/nv.d3.css" rel="stylesheet" type="text/css">
+    <link href="/static/css/fsa.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <style>
@@ -117,8 +118,30 @@
             </div>
         </div>
     </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="bs-callout bs-callout-info">
+                    <h4> Tutorial </h4>
+                    <p>First, look for some schools you're interested in. This can be done in 3 ways:</p>
+                    <ol>
+                        <li>Searching for the school in the top left dropdown</li>
+                        <li>Clicking on a school in the map</li>
+                        <li>Clicking inside a neighborhood (red polygons) </li>
+                    </ol>
+                <p>Click on a school or a school district to add it to the active schools below!</p>
+            </div>
+            </div>
+        </div>
+    </div>
     <div id="map-canvas" style="width: 100%; height: 400px"></div>
     <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+              <h3> Selected Schools </h3>
+            </div>
+            <div id="school-table" class="col-md-12"></div>
+        </div>
         <div class="row">
           <div class="col-md-12">
             <h4>Selected Schools</h4>
@@ -133,9 +156,6 @@
             <div id="notification-console">
             </div>
           </div>
-        </div>
-        <div class="row">
-          <div id="school-table" class="col-md-12"></div>
         </div>
         <div id="footer" class="row">
           <h5> Dataset provided by http://www.data.gov.bc.ca/ </h5>
@@ -182,33 +202,70 @@
     <script type="text/ractive" id="school-table-template">
         <table class="table table-striped">
             <thead>
-                <th>School Name</th>
-                <th>Trend</th>
+                <th class="sortable" on-click='sort:name'>School Name</th>
+                <th>Dist(km)</th>
                 <th>Math</th>
+                <th>Score (2007-2012)<br/>
+                </th>
                 <th>Reading</th>
-                <th>Rating</th>
+                <th>Score (2007-2012)</th>
+                <th> </th>
             </thead>
             <tbody>
-                {{#schools:i}}
+                {{# sort(schools, sortColumn) :i}}
                 <tr>
-                    <td>{{title}}</td>
                     <td>
+                        {{title}}
+                        <div class="btn-xs">(adddress)</div>
                     </td>
                     <td>
-                        <svg style="height: {{ config.sparkline.height }}; width: {{ config.sparkline.width }} ">
+                        (diff in KM)
+                    </td>
+                    <td>
+                        <svg on-click='showType' style="height: {{ config.sparkline.height }}; width: {{ config.sparkline.width }} ">
                             <polyline points="{{ sparkline(gr7_math, config.sparkline.height, config.sparkline.width) }}"
-                                      style="fill:none;stroke:red;stroke-width:1"/>
+                                      style="fill:none;stroke:rgb(100, 220, 249);stroke-width:2"/>
                         </svg>
                     </td>
                     <td>
-                         <svg style="height: {{ config.sparkline.height }}; width: {{ config.sparkline.width }}">
+                        <div style="display:table-row-group">
+                            {{#scores(gr7_math) :i}}
+                            <div style="color: white; background: grey;" class="square">{{ Math.round(this) }}</div>
+                            {{/scores}}
+                        </div>
+                        <div style="display:table-row-group">
+                            {{#scores_diff(gr7_math, "gr7_math") :i}}
+                            <div style="color: white; background-color: {{diff_color_status(this)}}" class="square">{{ Math.round(this) }}</div>
+                            {{/scores}}
+                        </div>
+                    </td>
+                    <td>
+                        <svg on-click='showType' style="height: {{ config.sparkline.height }}; width: {{ config.sparkline.width }} ">
                             <polyline points="{{ sparkline(gr7_read, config.sparkline.height, config.sparkline.width) }}"
-                                      style="fill:none;stroke:blue;stroke-width:1"/>
+                                      style="fill:none;stroke:red;stroke-width:2"/>
                         </svg>
                     </td>
-                    <td></td>
+                    <td>
+                        <div style="display:table-row-group">
+                            {{#scores(gr7_read):i}}
+                            <div style="color: white; background: grey;" class="square">{{ Math.round(this) }}</div>
+                            {{/scores}}
+                        </div>
+                        <div style="display:table-row-group">
+                            {{#scores_diff(gr7_read, "gr7_read") :i}}
+                            <div style="color: white; background-color: {{diff_color_status(this)}}" class="square">{{ Math.round(this) }}</div>
+                            {{/scores}}
+                        </div>
+                    </td>
+                    <td>
+                        {{^fixed}}
+                        <button on-click="removeRow:{{i}}" class="btn btn-mini btn-default">
+                            <span class="glyphicon glyphicon-remove"></span>
+                        </button>
+                        {{/fixed}}
+                    </td>
                 </tr>
-                {{/schools}}
+                {{/end of schools list}}
             </tbody>
         </table>
     </script>
