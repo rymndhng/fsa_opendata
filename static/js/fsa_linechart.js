@@ -3,21 +3,28 @@ var chartData = {};
 var districts;
 var schools;
 
-
 function drawError(msg) {
     var template = Handlebars.compile("<div class='alert alert-warning'>{{msg}}</div>");
-    var content = $(template({msg: msg}));
+    var content = $(template({
+        msg: msg
+    }));
     $("#notification-console").append(content);
     setTimeout(function() {
-        content.fadeOut(500, function() { $(this).remove();});
+        content.fadeOut(500, function() {
+            $(this).remove();
+        });
     }, 1000);
 }
 
+// global to add data to our managed resources
 function addData(data) {
     if (data.length == 0) {
         drawError("Selected school does not have any FSA scores in this period");
     }
-    for (var i=0; i < data.length; i++) {
+    var currentSeries;
+    for (var i = 0; i < data.length; i++) {
+
+        // only add if the data is new
         if (!chartData[data[i].key]) {
             selectedSchools.push(data[i].key);
             chartData[data[i].key] = data[i];
@@ -31,7 +38,9 @@ var chart;
 nv.addGraph(function() {
 
     chart = nv.models.lineChart()
-        .margin({left: 25})
+        .margin({
+            left: 25
+        })
         .useInteractiveGuideline(true)
         .showLegend(false)
         .showYAxis(true);
@@ -65,39 +74,41 @@ function drawChart() {
 
 
 function parseToXY(response) {
-      var formattedData;
-      var data = {};
-      var schools = [];
+    var formattedData;
+    var data = {};
+    var schools = [];
 
-      schools = _.chain(response)
-          .map(function(elem) {
-              return elem.school_name;
-          })
-          .unique(false)
-          .value();
+    schools = _.chain(response)
+        .map(function(elem) {
+            return elem.school_name;
+        })
+        .unique(false)
+        .value();
 
-      _.each(schools, function(elem) {
-          data[elem] = [];
-      });
+    _.each(schools, function(elem) {
+        data[elem] = [];
+    });
 
-      _.each(response, function(elem) {
-          data[elem.school_name].push(
-              {
-                  x: elem.school_year.split("/")[0],
-                  y: elem.score
-              });
-      });
+    _.each(response, function(elem) {
+        data[elem.school_name].push({
+            x: elem.school_year.split("/")[0],
+            y: elem.score
+        });
+    });
 
-      formattedData = _.map(data, function(v, k) {
-          return { key: k, values: v };
-      });
+    formattedData = _.map(data, function(v, k) {
+        return {
+            key: k,
+            values: v
+        };
+    });
 
-      return formattedData;
+    return formattedData;
 }
 
 // ------------- Setup Google Maps
 var mapOptions = {
-    center: new google.maps.LatLng(49.2515436,-123.1049354),
+    center: new google.maps.LatLng(49.2515436, -123.1049354),
     zoom: 12,
     scrollwheel: false
 };
@@ -108,24 +119,25 @@ var map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions)
 var neighborhoodToSchools = {};
 var polygonDeferred = $.Deferred();
 var schoolsDeferred = $.Deferred();
-$.when(polygonDeferred, schoolsDeferred).then(function (polygons, schools) {
+$.when(polygonDeferred, schoolsDeferred).then(function(polygons, schools) {
     // setup the polygons
-    polygons.forEach(function (polygon) {
+    polygons.forEach(function(polygon) {
         neighborhoodToSchools[polygon.title] = {
             schools: [],
             polygon: polygon
         };
     });
 
-    var vancouverSchools = _.where(schools, {"district_number": 39});
+    var vancouverSchools = _.where(schools, {
+        "district_number": 39
+    });
 
     var neighborhoodPairs = _.pairs(neighborhoodToSchools);
     vancouverSchools.forEach(function(s) {
         var latlng = new google.maps.LatLng(s.school_latitude, s.school_longitude);
         var neighborhood = _.find(neighborhoodPairs, function(pair) {
             return google.maps.geometry.poly.containsLocation(latlng, pair[1].polygon);
-        });
-        !!neighborhood && neighborhood[1].schools.push(s);
+        }); !! neighborhood && neighborhood[1].schools.push(s);
     });
 });
 
@@ -144,24 +156,24 @@ function useTheData(documents) {
     // parse all the document data
     documents.forEach(function(doc) {
 
-       // TODO: resolve should only be called once.
-       polygonDeferred.resolve(doc.gpolygons);
+        // TODO: resolve should only be called once.
+        polygonDeferred.resolve(doc.gpolygons);
 
-       // Adding event listeners for each polygon
-       doc.gpolygons.forEach(function (polygon) {
-           
-           google.maps.event.addListener(polygon, 'click', function(elem) {
-               var context = {
-                   name: polygon.title,
-                   schools: _.pluck(neighborhoodToSchools[polygon.title].schools, "school_name")
-               };
+        // Adding event listeners for each polygon
+        doc.gpolygons.forEach(function(polygon) {
 
-               infowindow.setContent(templates.infowindow.neighborhood(context));
-               infowindow.latlng = elem.latLng;
-               infowindow.open(map);
-           });
+            google.maps.event.addListener(polygon, 'click', function(elem) {
+                var context = {
+                    name: polygon.title,
+                    schools: _.pluck(neighborhoodToSchools[polygon.title].schools, "school_name")
+                };
 
-       });
+                infowindow.setContent(templates.infowindow.neighborhood(context));
+                infowindow.latlng = elem.latLng;
+                infowindow.open(map);
+            });
+
+        });
     });
 }
 
@@ -178,13 +190,14 @@ var geoXml = new geoXML3.parser({
 geoXml.parse('/static/cov_localareas.kml');
 
 function addSchool(district_id, school_name) {
-    d3.json("data?district_id="+district_id+"&school_name="+school_name, function (resp) {
+    d3.json("data?district_id=" + district_id + "&school_name=" + school_name, function(resp) {
         addData(parseToXY(resp));
+        addSchoolTableData(resp);
         drawChart();
     });
 }
 
-// --------------- Event Handlers 
+// --------------- Event Handlers
 $('#map-canvas').on('click', '.add-neighborhood', function(e) {
     var neighborhood_name = e.target.value;
     neighborhoodToSchools[neighborhood_name].schools.forEach(function(school) {
@@ -224,13 +237,13 @@ d3.json("schools", function(resp) {
 
         // store this in lookups
         gmap_markers[hash_school_key(s)] = marker;
-            
+
         google.maps.event.addListener(marker, 'click', function() {
             var context = {
                 school_name: s.school_name,
                 school_address: s.school_physical_address,
                 district_id: s.district_number
-            }; 
+            };
 
             infowindow.setContent(templates.infowindow.school(context));
             infowindow.latlng = latlng;
@@ -255,8 +268,7 @@ d3.json("schools", function(resp) {
         hint: true,
         highlight: true,
         minLength: 1
-    },
-    {
+    }, {
         name: 'Schools',
         displayKey: function(school) {
             return school.school_name;
@@ -270,8 +282,8 @@ d3.json("schools", function(resp) {
             school_name: s.school_name,
             school_address: s.school_physical_address,
             district_id: s.district_number
-        }; 
-        
+        };
+
         var latlng = new google.maps.LatLng(s.school_latitude, s.school_longitude);
 
         infowindow.setContent(templates.infowindow.school(context));
@@ -308,7 +320,92 @@ schoolsSelected.on({
         chartData = _.pick(chartData, selectedSchools);
         drawChart();
     },
+    addEntry: function(event) {
+        if (event.original.keyCode == 13) {
+            selectedSchools.push(event.original.target.value);
+            event.orginal.target.value = "";
+        }
+    }
 });
+
+var getPointsArray = function(array, xScale, yScale) {
+    var result = array.map(function(item, i) {
+        return xScale(item[i][0]) + "," + yScale(item[i][1]);
+    });
+
+    return result;
+}
+
+//======================================================================
+// Ractive schoolData Table
+//----------------------------------------------------------------------
+// App State
+var schoolData = [];
+
+// track the schools that are already added
+var addedSchoolsSet = {};
+
+function addSchoolTableData(newData) {
+    schoolData.push({
+        title: newData[0].school_name || (newData[0].district_name + " District"),
+        gr7_math: _.where(newData, {
+            fsa_skill_code: "Numeracy",
+            grade: 7,
+            sub_population: "ALL STUDENTS"
+        }),
+        gr7_read: _.where(newData, {
+            fsa_skill_code: "Reading",
+            grade: 7,
+            sub_population: "ALL STUDENTS"
+        }),
+        raw: newData
+    });
+}
+
+var schoolTableConfig = {
+   sparkline: {
+       height: 15,
+       width: 60
+   }
+}
+
+var schoolsData = new Ractive({
+    el: "#school-table",
+    template: "#school-table-template",
+    debug: true,
+    data: {
+        schools: schoolData,
+        config: schoolTableConfig,
+        sparkline: function(series, height, width) {
+
+            var sorted_series = _.chain(series).sortBy("school_year");
+            var xValues = sorted_series.pluck("school_year").map(getStartYear);
+            var yValues = sorted_series.pluck("score");
+
+            var xScale = d3.scale.linear()
+                .domain([2007, 2012])
+                .range([0, width]);
+
+            var yScale = d3.scale.linear()
+                .domain([yValues.min().value(), yValues.max().value()])
+                .range([0, height]);
+
+            return xValues.map(xScale)
+                .zip(yValues.map(yScale).value()).flatten().value();
+        }
+    }
+});
+
+addSchoolTableData(vancouver_data);
+
+// helper function to get the number string value encoded in form "2007/2008"
+function coerce(str) {
+    return +str;
+}
+
+function getStartYear(str) {
+    return coerce(str.substring(0, 4));
+}
 
 // A little hack to get Vancouver averages on the list
 (function() {
@@ -317,4 +414,3 @@ schoolsSelected.on({
     addData(van_data);
     // draw the initial empty chart
 })();
-

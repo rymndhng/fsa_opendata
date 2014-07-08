@@ -25,7 +25,7 @@ def line_chart(request):
     # interested only in district name and address
     filters = {
             'sub_population': "ALL STUDENTS",
-            'fsa_skill_code': "Numeracy",
+            # 'fsa_skill_code': "Numeracy",
             'grade': 7,
             'district_number': VANCOUER_DISTRICT_ID
             }
@@ -35,17 +35,20 @@ def line_chart(request):
     data_dict = {'vancouver_stats': json.dumps(bc_stats)}
     return render_to_response("index.html", data_dict)
 
+@gzip_page
 def data(request):
     district_id = int(request.GET['district_id'])
     school_name = request.GET['school_name']
 
     filters = {
-            'sub_population': "ALL STUDENTS",
-            'fsa_skill_code': "Numeracy",
+#            'sub_population': "ALL STUDENTS",
+#            'fsa_skill_code': "Numeracy",
             'grade': 7,
             'district_number': district_id,
             'school_name': school_name
             }
+
+    SchoolRecord.objects.filter(**filters)
 
     response_data = [record.to_dict() for record in SchoolRecord.objects.filter(**filters)]
     return HttpResponse(json.dumps(response_data), content_type="application/json")

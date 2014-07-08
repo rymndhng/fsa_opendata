@@ -13,7 +13,7 @@
     <script src='http://cdn.ractivejs.org/latest/ractive.js'></script>
     <link href="/static/css/nv.d3.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>          
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <style>
     /* Stealing styling from http://stackoverflow.com/questions/12013532/inline-style-tags-vs-inline-css-properties */
     .twitter-typeahead {
@@ -125,12 +125,17 @@
             <div id="school-selected"></div>
           </div>
         </div>
-        <div class="col-md-12">
-          <div id="chart">
-            <svg style="height: 500px"></svg>
+        <div class="row">
+          <div class="col-md-12">
+            <div id="chart">
+              <svg style="height: 500px"></svg>
+            </div>
+            <div id="notification-console">
+            </div>
           </div>
-          <div id="notification-console">
-          </div>
+        </div>
+        <div class="row">
+          <div id="school-table" class="col-md-12"></div>
         </div>
         <div id="footer" class="row">
           <h5> Dataset provided by http://www.data.gov.bc.ca/ </h5>
@@ -165,14 +170,48 @@
             {{this}}
             {{# i != 0}}
             <span on-click="removeEntry:{{i}}" class="glyphicon glyphicon-remove"></span>
-            {{/ i != 0}} 
+            {{/ i != 0}}
           </span>
           &nbsp;
           {{/schools}}
+          <input on-keydown="addEntry"/>
         </div>
       </h4>
     </script>
-    
+
+    <script type="text/ractive" id="school-table-template">
+        <table class="table table-striped">
+            <thead>
+                <th>School Name</th>
+                <th>Trend</th>
+                <th>Math</th>
+                <th>Reading</th>
+                <th>Rating</th>
+            </thead>
+            <tbody>
+                {{#schools:i}}
+                <tr>
+                    <td>{{title}}</td>
+                    <td>
+                    </td>
+                    <td>
+                        <svg style="height: {{ config.sparkline.height }}; width: {{ config.sparkline.width }} ">
+                            <polyline points="{{ sparkline(gr7_math, config.sparkline.height, config.sparkline.width) }}"
+                                      style="fill:none;stroke:red;stroke-width:1"/>
+                        </svg>
+                    </td>
+                    <td>
+                         <svg style="height: {{ config.sparkline.height }}; width: {{ config.sparkline.width }}">
+                            <polyline points="{{ sparkline(gr7_read, config.sparkline.height, config.sparkline.width) }}"
+                                      style="fill:none;stroke:blue;stroke-width:1"/>
+                        </svg>
+                    </td>
+                    <td></td>
+                </tr>
+                {{/schools}}
+            </tbody>
+        </table>
+    </script>
     {% endverbatim %}
     <script type"text/javascript">
       var vancouver_data = {{vancouver_stats|safe}};
