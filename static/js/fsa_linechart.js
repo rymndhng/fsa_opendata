@@ -372,7 +372,6 @@ var schoolTableConfig = {
 var schoolsData = new Ractive({
     el: "#school-table",
     template: "#school-table-template",
-    debug: true,
     data: {
         schools: schoolData,
         config: schoolTableConfig,
@@ -390,8 +389,7 @@ var schoolsData = new Ractive({
                 .domain([yValues.min().value(), yValues.max().value()])
                 .range([0, height]);
 
-            return xValues.map(xScale)
-                .zip(yValues.map(yScale).value()).flatten().value();
+            return xValues.map(xScale).zip(yValues.map(yScale).value()).flatten().value().join(',');
         }
     }
 });
